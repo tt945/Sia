@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/types"
 	"github.com/NebulousLabs/errors"
 	"github.com/NebulousLabs/fastrand"
 

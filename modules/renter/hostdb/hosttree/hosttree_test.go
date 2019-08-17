@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	siasync "github.com/NebulousLabs/Sia/sync"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/modules"
+	siasync "Sia/sync"
+	"Sia/types"
 	"github.com/NebulousLabs/fastrand"
 )
 

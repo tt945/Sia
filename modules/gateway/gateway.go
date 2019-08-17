@@ -103,9 +103,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/persist"
-	siasync "github.com/NebulousLabs/Sia/sync"
+	"Sia/modules"
+	"Sia/persist"
+	siasync "Sia/sync"
 	"github.com/NebulousLabs/fastrand"
 )
 

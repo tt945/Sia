@@ -3,8 +3,8 @@ package modules
 import (
 	"errors"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/types"
 )
 
 const (

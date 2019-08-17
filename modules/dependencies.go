@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/persist"
+	"Sia/build"
+	"Sia/persist"
 	"github.com/NebulousLabs/fastrand"
 )
 

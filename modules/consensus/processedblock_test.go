@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/gateway"
-	"github.com/NebulousLabs/Sia/modules/miner"
-	"github.com/NebulousLabs/Sia/modules/transactionpool"
-	"github.com/NebulousLabs/Sia/modules/wallet"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/modules/gateway"
+	"Sia/modules/miner"
+	"Sia/modules/transactionpool"
+	"Sia/modules/wallet"
+	"Sia/types"
 )
 
 // TestIntegrationMinimumValidChildTimestamp probes the

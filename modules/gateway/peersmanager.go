@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/build"
+	"Sia/modules"
 	"github.com/NebulousLabs/fastrand"
 )
 

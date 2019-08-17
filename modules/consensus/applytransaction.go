@@ -4,9 +4,9 @@ package consensus
 // There is an assumption that the transaction has already been verified.
 
 import (
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/types"
 
 	"github.com/coreos/bbolt"
 )

@@ -3,8 +3,8 @@ package siatest
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/node"
+	"Sia/build"
+	"Sia/node"
 )
 
 // TestCreateTestGroup tests the behavior of NewGroup.

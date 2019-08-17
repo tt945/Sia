@@ -18,8 +18,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/crypto"
+	"Sia/modules"
 	"github.com/NebulousLabs/fastrand"
 )
 

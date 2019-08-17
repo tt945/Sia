@@ -36,11 +36,11 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/types"
 
 	"github.com/coreos/bbolt"
 )

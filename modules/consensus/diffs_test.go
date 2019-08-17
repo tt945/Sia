@@ -3,8 +3,8 @@ package consensus
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/modules"
+	"Sia/types"
 
 	"github.com/coreos/bbolt"
 )

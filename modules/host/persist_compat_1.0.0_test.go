@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/types"
 )
 
 // TestHostPersistCompat100 tests breaking changes in the host persist struct

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
+	"Sia/crypto"
+	"Sia/encoding"
 	"github.com/NebulousLabs/fastrand"
 )
 

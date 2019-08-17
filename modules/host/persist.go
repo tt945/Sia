@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/persist"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/persist"
+	"Sia/types"
 
 	"github.com/coreos/bbolt"
 )

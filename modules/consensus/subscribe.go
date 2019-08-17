@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/build"
+	"Sia/modules"
 
-	siasync "github.com/NebulousLabs/Sia/sync"
+	siasync "Sia/sync"
 	"github.com/coreos/bbolt"
 )
 

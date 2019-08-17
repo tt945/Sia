@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/crypto"
+	"Sia/modules"
 )
 
 // TestShrinkStorageFolder checks that a storage folder can be successfully

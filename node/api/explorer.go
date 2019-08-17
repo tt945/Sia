@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/types"
 
 	"github.com/julienschmidt/httprouter"
 )

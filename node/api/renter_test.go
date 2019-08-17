@@ -14,11 +14,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/renter"
-	"github.com/NebulousLabs/Sia/modules/renter/contractor"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/modules/renter"
+	"Sia/modules/renter/contractor"
+	"Sia/types"
 	"github.com/NebulousLabs/fastrand"
 )
 

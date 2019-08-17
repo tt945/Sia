@@ -4,8 +4,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/node/api"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/node/api"
+	"Sia/types"
 )
 
 // TestSortByValue tests that byValue sorts contracts correctly.

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/persist"
+	"Sia/modules"
+	"Sia/persist"
 )
 
 func TestLoad(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/persist"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/persist"
 	"github.com/NebulousLabs/fastrand"
 )
 

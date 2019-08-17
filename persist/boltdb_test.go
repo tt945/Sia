@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 	"github.com/NebulousLabs/fastrand"
 	"github.com/coreos/bbolt"
 )

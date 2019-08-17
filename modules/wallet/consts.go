@@ -1,7 +1,7 @@
 package wallet
 
 import (
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 )
 
 const (

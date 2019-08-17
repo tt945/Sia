@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/modules"
 )
 
 // TestHostContractCountPersistence checks that the host persists its contract

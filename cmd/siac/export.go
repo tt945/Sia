@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/types"
 
 	"github.com/spf13/cobra"
 )

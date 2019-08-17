@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/types"
 )
 
 // TestContractUncommittedTxn tests that if a contract revision is left in an

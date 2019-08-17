@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/siatest"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/siatest"
+	"Sia/types"
 )
 
 // TestTransactionReorg makes sure that a processedTransaction isn't returned

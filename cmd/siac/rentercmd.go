@@ -36,9 +36,9 @@ import (
 	"github.com/NebulousLabs/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/node/api"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/modules"
+	"Sia/node/api"
+	"Sia/types"
 )
 
 var (

@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/profile"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/profile"
 	mnemonics "github.com/NebulousLabs/entropy-mnemonics"
 
 	"github.com/spf13/cobra"

@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/node/api"
+	"Sia/modules"
+	"Sia/node/api"
 	"github.com/NebulousLabs/errors"
 )
 

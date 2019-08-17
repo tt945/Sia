@@ -1,9 +1,9 @@
 package contractor
 
 import (
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/types"
 )
 
 // Constants related to contract formation parameters.

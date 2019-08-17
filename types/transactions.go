@@ -8,9 +8,9 @@ package types
 import (
 	"errors"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/encoding"
 )
 
 const (

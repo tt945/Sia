@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 )
 
 // TestThreadGroupStopEarly tests that a thread group can correctly interrupt

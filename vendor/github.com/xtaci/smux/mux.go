@@ -1,8 +1,12 @@
+// Package smux is a multiplexing library for Golang.
+//
+// It relies on an underlying connection to provide reliability and ordering, such as TCP or KCP,
+// and provides stream-oriented multiplexing over a single channel.
 package smux
 
 import (
 	"fmt"
-	"net"
+	"io"
 	"time"
 
 	"github.com/pkg/errors"
@@ -24,26 +28,15 @@ type Config struct {
 	// MaxReceiveBuffer is used to control the maximum
 	// number of data in the buffer pool
 	MaxReceiveBuffer int
-
-	// ReadTimeout defines the global timeout for writing a single frame to a
-	// conn.
-	ReadTimeout time.Duration
-
-	// WriteTimeout defines the default amount of time to wait before giving up
-	// on a write. This same value is used as a global timeout for writing a
-	// single frame to the connection.
-	WriteTimeout time.Duration
 }
 
 // DefaultConfig is used to return a default configuration
 func DefaultConfig() *Config {
 	return &Config{
 		KeepAliveInterval: 10 * time.Second,
-		KeepAliveTimeout:  120 * time.Second,
-		MaxFrameSize:      4096,
+		KeepAliveTimeout:  30 * time.Second,
+		MaxFrameSize:      32768,
 		MaxReceiveBuffer:  4194304,
-		ReadTimeout:       120 * time.Second,
-		WriteTimeout:      120 * time.Second,
 	}
 }
 
@@ -68,7 +61,7 @@ func VerifyConfig(config *Config) error {
 }
 
 // Server is used to initialize a new server-side connection.
-func Server(conn net.Conn, config *Config) (*Session, error) {
+func Server(conn io.ReadWriteCloser, config *Config) (*Session, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -79,7 +72,7 @@ func Server(conn net.Conn, config *Config) (*Session, error) {
 }
 
 // Client is used to initialize a new client-side connection.
-func Client(conn net.Conn, config *Config) (*Session, error) {
+func Client(conn io.ReadWriteCloser, config *Config) (*Session, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}

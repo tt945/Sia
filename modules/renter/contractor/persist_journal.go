@@ -25,12 +25,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/renter/proto"
-	"github.com/NebulousLabs/Sia/persist"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/modules/renter/proto"
+	"Sia/persist"
+	"Sia/types"
 )
 
 var journalMeta = persist.Metadata{

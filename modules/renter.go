@@ -5,8 +5,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/types"
 
 	"github.com/NebulousLabs/errors"
 )

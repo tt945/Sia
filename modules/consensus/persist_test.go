@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/gateway"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/modules/gateway"
 )
 
 // TestSaveLoad populates a blockchain, saves it, loads it, and checks

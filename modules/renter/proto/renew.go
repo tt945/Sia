@@ -3,10 +3,10 @@ package proto
 import (
 	"net"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/types"
 
 	"github.com/NebulousLabs/errors"
 )

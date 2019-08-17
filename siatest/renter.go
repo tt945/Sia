@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/node/api"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/node/api"
 
 	"github.com/NebulousLabs/errors"
 	"github.com/NebulousLabs/fastrand"

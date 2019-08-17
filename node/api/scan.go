@@ -3,9 +3,9 @@ package api
 import (
 	"math/big"
 
+	"Sia/crypto"
+	"Sia/types"
 	"errors"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/types"
 )
 
 // scanAmount scans a types.Currency from a string.

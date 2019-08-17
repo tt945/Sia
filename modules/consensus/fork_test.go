@@ -3,7 +3,7 @@ package consensus
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/modules"
 )
 
 // TestBacktrackToCurrentPath probes the backtrackToCurrentPath method of the

@@ -3,7 +3,7 @@ package gateway
 import (
 	"net"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 	"github.com/xtaci/smux"
 )
 

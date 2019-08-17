@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/build"
+	"Sia/encoding"
+	"Sia/modules"
 	"github.com/NebulousLabs/fastrand"
 )
 

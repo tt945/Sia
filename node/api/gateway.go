@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/modules"
 
 	"github.com/julienschmidt/httprouter"
 )

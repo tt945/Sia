@@ -14,11 +14,11 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/renter/proto"
-	"github.com/NebulousLabs/Sia/persist"
-	siasync "github.com/NebulousLabs/Sia/sync"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/modules"
+	"Sia/modules/renter/proto"
+	"Sia/persist"
+	siasync "Sia/sync"
+	"Sia/types"
 )
 
 var (

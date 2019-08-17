@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 	"github.com/NebulousLabs/fastrand"
 )
 

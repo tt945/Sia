@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/persist"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/persist"
+	"Sia/types"
 	"github.com/NebulousLabs/errors"
 	"github.com/NebulousLabs/fastrand"
 

@@ -4,8 +4,8 @@ package consensus
 // compatibility with the test suite.
 
 import (
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/encoding"
+	"Sia/types"
 
 	"github.com/coreos/bbolt"
 )

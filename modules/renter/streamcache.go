@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 	"github.com/NebulousLabs/errors"
 )
 

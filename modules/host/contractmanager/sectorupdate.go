@@ -5,9 +5,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
 )
 
 // commitUpdateSector will commit a sector update to the contract manager,

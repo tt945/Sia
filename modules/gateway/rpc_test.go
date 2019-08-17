@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/encoding"
+	"Sia/modules"
 )
 
 func TestRPCID(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/modules"
 )
 
 // capacity returns the amount of storage still available on the machine. The

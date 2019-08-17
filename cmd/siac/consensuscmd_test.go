@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/types"
 )
 
 // TestEstimatedHeightAt tests that the expectedHeightAt function correctly

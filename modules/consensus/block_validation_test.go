@@ -3,7 +3,7 @@ package consensus
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/types"
 )
 
 // mockMarshaler is a mock implementation of the encoding.GenericMarshaler

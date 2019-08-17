@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/types"
 )
 
 // TestHostPoorConnectivity creates several full server testers and links them

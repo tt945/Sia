@@ -3,9 +3,9 @@ package hostdb
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/crypto"
+	"Sia/modules"
+	"Sia/types"
 )
 
 // makeSignedAnnouncement creates a []byte that contains an encoded and signed

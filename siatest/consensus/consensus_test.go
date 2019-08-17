@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/NebulousLabs/Sia/node"
-	"github.com/NebulousLabs/Sia/siatest"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/node"
+	"Sia/siatest"
+	"Sia/types"
 )
 
 // TestApiHeight checks if the consensus api endpoint works

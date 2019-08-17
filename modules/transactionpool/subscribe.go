@@ -1,10 +1,10 @@
 package transactionpool
 
 import (
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/encoding"
+	"Sia/modules"
+	"Sia/types"
 )
 
 // updateSubscribersTransactions sends a new transaction pool update to all

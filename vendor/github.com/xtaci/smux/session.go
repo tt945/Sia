@@ -8,7 +8,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	siasync "github.com/NebulousLabs/Sia/sync" // TODO: Replace with github.com/NebulousLabs/trymutex
 	"github.com/pkg/errors"
 )
 
@@ -17,17 +16,28 @@ const (
 )
 
 var (
-	errBrokenPipe      = errors.New("broken pipe")
+	errInvalidProtocol = errors.New("invalid protocol")
 	errGoAway          = errors.New("stream id overflows, should start a new connection")
-	errInvalidProtocol = errors.New("invalid protocol version")
-	errLargeFrame      = errors.New("frame is too large to send")
+	errTimeout         = errors.New("timeout")
 )
+
+type writeRequest struct {
+	frame  Frame
+	result chan writeResult
+}
+
+type writeResult struct {
+	n   int
+	err error
+}
+
+type buffersWriter interface {
+	WriteBuffers(v [][]byte) (n int, err error)
+}
 
 // Session defines a multiplexed connection for streams
 type Session struct {
-	conn        net.Conn
-	dataWasRead int32            // used to determine if KeepAlive has failed
-	sendMu      siasync.TryMutex // ensures only one thread sends at a time
+	conn io.ReadWriteCloser
 
 	config           *Config
 	nextStreamID     uint32 // next stream identifier
@@ -39,16 +49,34 @@ type Session struct {
 	streams    map[uint32]*Stream // all streams in this session
 	streamLock sync.Mutex         // locks streams
 
-	die       chan struct{} // flag session has died
-	dieLock   sync.Mutex
+	die     chan struct{} // flag session has died
+	dieOnce sync.Once
+
+	// socket error handling
+	socketReadError      atomic.Value
+	socketWriteError     atomic.Value
+	chSocketReadError    chan struct{}
+	chSocketWriteError   chan struct{}
+	socketReadErrorOnce  sync.Once
+	socketWriteErrorOnce sync.Once
+
+	// smux protocol errors
+	protoError     atomic.Value
+	chProtoError   chan struct{}
+	protoErrorOnce sync.Once
+
 	chAccepts chan *Stream
+
+	dataReady int32 // flag data has arrived
 
 	goAway int32 // flag id exhausted
 
 	deadline atomic.Value
+
+	writes chan writeRequest
 }
 
-func newSession(config *Config, conn net.Conn, client bool) *Session {
+func newSession(config *Config, conn io.ReadWriteCloser, client bool) *Session {
 	s := new(Session)
 	s.die = make(chan struct{})
 	s.conn = conn
@@ -57,34 +85,33 @@ func newSession(config *Config, conn net.Conn, client bool) *Session {
 	s.chAccepts = make(chan *Stream, defaultAcceptBacklog)
 	s.bucket = int32(config.MaxReceiveBuffer)
 	s.bucketNotify = make(chan struct{}, 1)
+	s.writes = make(chan writeRequest)
+	s.chSocketReadError = make(chan struct{})
+	s.chSocketWriteError = make(chan struct{})
+	s.chProtoError = make(chan struct{})
 
 	if client {
 		s.nextStreamID = 1
 	} else {
 		s.nextStreamID = 0
 	}
-
 	go s.recvLoop()
-	// keepaliveSend and keepaliveTimeout need to be separate threads, because
-	// the keepaliveSend can block, and especially if the underlying conn has no
-	// deadline or a very long deadline, we may not check the keepaliveTimeout
-	// for an extended period of time and potentially even end in a deadlock.
-	go s.keepAliveSend()
-	go s.keepAliveTimeout()
+	go s.sendLoop()
+	go s.keepalive()
 	return s
 }
 
 // OpenStream is used to create a new stream
 func (s *Session) OpenStream() (*Stream, error) {
 	if s.IsClosed() {
-		return nil, errBrokenPipe
+		return nil, errors.WithStack(io.ErrClosedPipe)
 	}
 
 	// generate stream id
 	s.nextStreamIDLock.Lock()
 	if s.goAway > 0 {
 		s.nextStreamIDLock.Unlock()
-		return nil, errGoAway
+		return nil, errors.WithStack(errGoAway)
 	}
 
 	s.nextStreamID += 2
@@ -92,20 +119,27 @@ func (s *Session) OpenStream() (*Stream, error) {
 	if sid == sid%2 { // stream-id overflows
 		s.goAway = 1
 		s.nextStreamIDLock.Unlock()
-		return nil, errGoAway
+		return nil, errors.WithStack(errGoAway)
 	}
 	s.nextStreamIDLock.Unlock()
 
 	stream := newStream(sid, s.config.MaxFrameSize, s)
 
-	if _, err := s.writeFrame(newFrame(cmdSYN, sid), time.Now().Add(s.config.WriteTimeout)); err != nil {
-		return nil, errors.Wrap(err, "writeFrame")
+	if _, err := s.writeFrame(newFrame(cmdSYN, sid)); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
 	s.streamLock.Lock()
-	s.streams[sid] = stream
-	s.streamLock.Unlock()
-	return stream, nil
+	defer s.streamLock.Unlock()
+	select {
+	case <-s.chSocketWriteError:
+		return nil, s.socketWriteError.Load().(error)
+	case <-s.die:
+		return nil, errors.WithStack(io.ErrClosedPipe)
+	default:
+		s.streams[sid] = stream
+		return stream, nil
+	}
 }
 
 // AcceptStream is used to block until the next available stream
@@ -113,38 +147,42 @@ func (s *Session) OpenStream() (*Stream, error) {
 func (s *Session) AcceptStream() (*Stream, error) {
 	var deadline <-chan time.Time
 	if d, ok := s.deadline.Load().(time.Time); ok && !d.IsZero() {
-		timer := time.NewTimer(d.Sub(time.Now()))
+		timer := time.NewTimer(time.Until(d))
 		defer timer.Stop()
 		deadline = timer.C
 	}
+
 	select {
 	case stream := <-s.chAccepts:
 		return stream, nil
 	case <-deadline:
-		return nil, errTimeout
+		return nil, errors.WithStack(errTimeout)
+	case <-s.chSocketReadError:
+		return nil, s.socketReadError.Load().(error)
+	case <-s.chProtoError:
+		return nil, s.protoError.Load().(error)
 	case <-s.die:
-		return nil, errBrokenPipe
+		return nil, errors.WithStack(io.ErrClosedPipe)
 	}
 }
 
 // Close is used to close the session and all streams.
-func (s *Session) Close() (err error) {
-	s.dieLock.Lock()
-
-	select {
-	case <-s.die:
-		s.dieLock.Unlock()
-		return errBrokenPipe
-	default:
+func (s *Session) Close() error {
+	var once bool
+	s.dieOnce.Do(func() {
 		close(s.die)
-		s.dieLock.Unlock()
+		once = true
+	})
+
+	if once {
 		s.streamLock.Lock()
 		for k := range s.streams {
 			s.streams[k].sessionClose()
 		}
 		s.streamLock.Unlock()
-		s.notifyBucket()
 		return s.conn.Close()
+	} else {
+		return errors.WithStack(io.ErrClosedPipe)
 	}
 }
 
@@ -154,6 +192,27 @@ func (s *Session) notifyBucket() {
 	case s.bucketNotify <- struct{}{}:
 	default:
 	}
+}
+
+func (s *Session) notifyReadError(err error) {
+	s.socketReadErrorOnce.Do(func() {
+		s.socketReadError.Store(err)
+		close(s.chSocketReadError)
+	})
+}
+
+func (s *Session) notifyWriteError(err error) {
+	s.socketWriteErrorOnce.Do(func() {
+		s.socketWriteError.Store(err)
+		close(s.chSocketWriteError)
+	})
+}
+
+func (s *Session) notifyProtoError(err error) {
+	s.protoErrorOnce.Do(func() {
+		s.protoError.Store(err)
+		close(s.chProtoError)
+	})
 }
 
 // IsClosed does a safe check to see if we have shutdown
@@ -183,6 +242,26 @@ func (s *Session) SetDeadline(t time.Time) error {
 	return nil
 }
 
+// LocalAddr satisfies net.Conn interface
+func (s *Session) LocalAddr() net.Addr {
+	if ts, ok := s.conn.(interface {
+		LocalAddr() net.Addr
+	}); ok {
+		return ts.LocalAddr()
+	}
+	return nil
+}
+
+// RemoteAddr satisfies net.Conn interface
+func (s *Session) RemoteAddr() net.Addr {
+	if ts, ok := s.conn.(interface {
+		RemoteAddr() net.Addr
+	}); ok {
+		return ts.RemoteAddr()
+	}
+	return nil
+}
+
 // notify the session that a stream has closed
 func (s *Session) streamClosed(sid uint32) {
 	s.streamLock.Lock()
@@ -202,52 +281,34 @@ func (s *Session) returnTokens(n int) {
 	}
 }
 
-// session read a frame from underlying connection
-// it's data is pointed to the input buffer
-func (s *Session) readFrame(buffer []byte) (f Frame, err error) {
-	// Ensure that reading a frame follows the global timeout.
-	s.conn.SetReadDeadline(time.Now().Add(s.config.ReadTimeout))
-	defer s.conn.SetReadDeadline(time.Time{})
-
-	if _, err := io.ReadFull(s.conn, buffer[:headerSize]); err != nil {
-		return f, errors.Wrap(err, "readFrame")
-	}
-
-	dec := rawHeader(buffer)
-	if dec.Version() != version {
-		return f, errInvalidProtocol
-	}
-
-	f.ver = dec.Version()
-	f.cmd = dec.Cmd()
-	f.sid = dec.StreamID()
-	if length := dec.Length(); length > 0 {
-		if _, err := io.ReadFull(s.conn, buffer[headerSize:headerSize+length]); err != nil {
-			return f, errors.Wrap(err, "readFrame")
-		}
-		f.data = buffer[headerSize : headerSize+length]
-	}
-	return f, nil
-}
-
 // recvLoop keeps on reading from underlying connection if tokens are available
 func (s *Session) recvLoop() {
-	buffer := make([]byte, (1<<16)+headerSize)
+	var hdr rawHeader
+
 	for {
 		for atomic.LoadInt32(&s.bucket) <= 0 && !s.IsClosed() {
-			<-s.bucketNotify
+			select {
+			case <-s.bucketNotify:
+			case <-s.die:
+				return
+			}
 		}
 
-		if f, err := s.readFrame(buffer); err == nil {
-			atomic.StoreInt32(&s.dataWasRead, 1)
-
-			switch f.cmd {
+		// read header first
+		if _, err := io.ReadFull(s.conn, hdr[:]); err == nil {
+			atomic.StoreInt32(&s.dataReady, 1)
+			if hdr.Version() != version {
+				s.notifyProtoError(errors.WithStack(errInvalidProtocol))
+				return
+			}
+			sid := hdr.StreamID()
+			switch hdr.Cmd() {
 			case cmdNOP:
 			case cmdSYN:
 				s.streamLock.Lock()
-				if _, ok := s.streams[f.sid]; !ok {
-					stream := newStream(f.sid, s.config.MaxFrameSize, s)
-					s.streams[f.sid] = stream
+				if _, ok := s.streams[sid]; !ok {
+					stream := newStream(sid, s.config.MaxFrameSize, s)
+					s.streams[sid] = stream
 					select {
 					case s.chAccepts <- stream:
 					case <-s.die:
@@ -256,57 +317,108 @@ func (s *Session) recvLoop() {
 				s.streamLock.Unlock()
 			case cmdFIN:
 				s.streamLock.Lock()
-				if stream, ok := s.streams[f.sid]; ok {
-					stream.markRST()
+				if stream, ok := s.streams[sid]; ok {
+					stream.fin()
 					stream.notifyReadEvent()
 				}
 				s.streamLock.Unlock()
 			case cmdPSH:
-				s.streamLock.Lock()
-				if stream, ok := s.streams[f.sid]; ok {
-					atomic.AddInt32(&s.bucket, -int32(len(f.data)))
-					stream.pushBytes(f.data)
-					stream.notifyReadEvent()
+				if hdr.Length() > 0 {
+					newbuf := defaultAllocator.Get(int(hdr.Length()))
+					if written, err := io.ReadFull(s.conn, newbuf); err == nil {
+						s.streamLock.Lock()
+						if stream, ok := s.streams[sid]; ok {
+							stream.pushBytes(newbuf)
+							atomic.AddInt32(&s.bucket, -int32(written))
+							stream.notifyReadEvent()
+						}
+						s.streamLock.Unlock()
+					} else {
+						s.notifyReadError(errors.WithStack(err))
+						return
+					}
 				}
-				s.streamLock.Unlock()
 			default:
-				s.Close()
+				s.notifyProtoError(errors.WithStack(errInvalidProtocol))
 				return
 			}
 		} else {
-			s.Close()
+			s.notifyReadError(errors.WithStack(err))
 			return
 		}
 	}
 }
 
-// keepAliveSend will periodically send a keepalive message to the remote peer.
-func (s *Session) keepAliveSend() {
-	ticker := time.NewTicker(s.config.KeepAliveInterval)
-	defer ticker.Stop()
+func (s *Session) keepalive() {
+	tickerPing := time.NewTicker(s.config.KeepAliveInterval)
+	tickerTimeout := time.NewTicker(s.config.KeepAliveTimeout)
+	defer tickerPing.Stop()
+	defer tickerTimeout.Stop()
 	for {
 		select {
-		case <-s.die:
-			return
-		case <-ticker.C:
-			s.writeFrame(newFrame(cmdNOP, 0), time.Now().Add(s.config.WriteTimeout))
+		case <-tickerPing.C:
+			s.writeFrameInternal(newFrame(cmdNOP, 0), tickerPing.C)
 			s.notifyBucket() // force a signal to the recvLoop
+		case <-tickerTimeout.C:
+			if !atomic.CompareAndSwapInt32(&s.dataReady, 1, 0) {
+				s.Close()
+				return
+			}
+		case <-s.die:
+			return
 		}
 	}
 }
 
-// keepAliveTimeout will periodically check that some sort of message has been
-// sent by the remote peer, closing the session if not.
-func (s *Session) keepAliveTimeout() {
-	ticker := time.NewTicker(s.config.KeepAliveTimeout)
-	defer ticker.Stop()
+func (s *Session) sendLoop() {
+	var buf []byte
+	var n int
+	var err error
+	var vec [][]byte // vector for writeBuffers
+
+	bw, ok := s.conn.(buffersWriter)
+	if ok {
+		buf = make([]byte, headerSize)
+		vec = make([][]byte, 2)
+	} else {
+		buf = make([]byte, (1<<16)+headerSize)
+	}
+
 	for {
 		select {
 		case <-s.die:
 			return
-		case <-ticker.C:
-			if !atomic.CompareAndSwapInt32(&s.dataWasRead, 1, 0) {
-				s.Close()
+		case request := <-s.writes:
+			buf[0] = request.frame.ver
+			buf[1] = request.frame.cmd
+			binary.LittleEndian.PutUint16(buf[2:], uint16(len(request.frame.data)))
+			binary.LittleEndian.PutUint32(buf[4:], request.frame.sid)
+
+			if len(vec) > 0 {
+				vec[0] = buf[:headerSize]
+				vec[1] = request.frame.data
+				n, err = bw.WriteBuffers(vec)
+			} else {
+				copy(buf[headerSize:], request.frame.data)
+				n, err = s.conn.Write(buf[:headerSize+len(request.frame.data)])
+			}
+
+			n -= headerSize
+			if n < 0 {
+				n = 0
+			}
+
+			result := writeResult{
+				n:   n,
+				err: errors.WithStack(err),
+			}
+
+			request.result <- result
+			close(request.result)
+
+			// store conn error
+			if err != nil {
+				s.notifyWriteError(errors.WithStack(err))
 				return
 			}
 		}
@@ -315,53 +427,34 @@ func (s *Session) keepAliveTimeout() {
 
 // writeFrame writes the frame to the underlying connection
 // and returns the number of bytes written if successful
-func (s *Session) writeFrame(frame Frame, timeout time.Time) (int, error) {
-	// Verify the frame data size.
-	if len(frame.data) > 1<<16 {
-		return 0, errLargeFrame
-	}
+func (s *Session) writeFrame(f Frame) (n int, err error) {
+	return s.writeFrameInternal(f, nil)
+}
 
-	// Ensure that the configured WriteTimeout is the maximum amount of time
-	// that we can wait to send a single frame.
-	latestTimeout := time.Now().Add(s.config.WriteTimeout)
-	if timeout.IsZero() || timeout.After(latestTimeout) {
-		timeout = latestTimeout
+// internal writeFrame version to support deadline used in keepalive
+func (s *Session) writeFrameInternal(f Frame, deadline <-chan time.Time) (int, error) {
+	req := writeRequest{
+		frame:  f,
+		result: make(chan writeResult, 1),
 	}
-
-	// Determine how much time remains in the timeout, wait for up to that long
-	// to grab the sendMu.
-	currentTime := time.Now()
-	if !timeout.After(currentTime) {
-		return 0, errTimeout
-	}
-	remaining := timeout.Sub(currentTime)
-	if !s.sendMu.TryLockTimed(remaining) {
-		return 0, errTimeout
-	}
-	defer s.sendMu.Unlock()
-
-	// Check again that the stream has not been killed.
 	select {
+	case s.writes <- req:
 	case <-s.die:
-		return 0, errBrokenPipe
-	default:
+		return 0, errors.WithStack(io.ErrClosedPipe)
+	case <-s.chSocketWriteError:
+		return 0, s.socketWriteError.Load().(error)
+	case <-deadline:
+		return 0, errors.WithStack(errTimeout)
 	}
 
-	// Prepare the write data.
-	buf := make([]byte, headerSize+len(frame.data))
-	buf[0] = frame.ver
-	buf[1] = frame.cmd
-	binary.LittleEndian.PutUint16(buf[2:], uint16(len(frame.data)))
-	binary.LittleEndian.PutUint32(buf[4:], frame.sid)
-	copy(buf[headerSize:], frame.data)
-
-	// Write the data using the provided writeTimeout.
-	s.conn.SetWriteDeadline(timeout)
-	n, err := s.conn.Write(buf[:headerSize+len(frame.data)])
-	s.conn.SetWriteDeadline(time.Time{})
-	n -= headerSize
-	if n < 0 {
-		n = 0
+	select {
+	case result := <-req.result:
+		return result.n, errors.WithStack(result.err)
+	case <-s.die:
+		return 0, errors.WithStack(io.ErrClosedPipe)
+	case <-s.chSocketWriteError:
+		return 0, s.socketWriteError.Load().(error)
+	case <-deadline:
+		return 0, errors.WithStack(errTimeout)
 	}
-	return n, err
 }

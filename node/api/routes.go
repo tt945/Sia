@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NebulousLabs/Sia/build"
+	"Sia/build"
 	"github.com/julienschmidt/httprouter"
 )
 

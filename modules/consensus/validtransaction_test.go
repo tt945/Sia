@@ -3,9 +3,9 @@ package consensus
 import (
 	"testing"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/crypto"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/crypto"
+	"Sia/types"
 	"github.com/NebulousLabs/fastrand"
 
 	"github.com/coreos/bbolt"

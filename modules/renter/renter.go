@@ -26,13 +26,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/NebulousLabs/Sia/build"
-	"github.com/NebulousLabs/Sia/modules"
-	"github.com/NebulousLabs/Sia/modules/renter/contractor"
-	"github.com/NebulousLabs/Sia/modules/renter/hostdb"
-	"github.com/NebulousLabs/Sia/persist"
-	siasync "github.com/NebulousLabs/Sia/sync"
-	"github.com/NebulousLabs/Sia/types"
+	"Sia/build"
+	"Sia/modules"
+	"Sia/modules/renter/contractor"
+	"Sia/modules/renter/hostdb"
+	"Sia/persist"
+	siasync "Sia/sync"
+	"Sia/types"
 
 	"github.com/NebulousLabs/threadgroup"
 )

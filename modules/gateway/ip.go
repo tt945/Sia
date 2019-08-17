@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/NebulousLabs/Sia/encoding"
-	"github.com/NebulousLabs/Sia/modules"
+	"Sia/encoding"
+	"Sia/modules"
 	"github.com/NebulousLabs/errors"
 )
 
